@@ -79,7 +79,24 @@ docker kill $CONTAINER_ID
 ### 4. Python unittest
 [Top](#reference)
 
-Suppose we have a `project` with `src` and `test` directories, containing `python` source code and test scripts, respectively. Assume `/home/user/project` already exists when the container is launched, because that directory was setup with `python -m venv` in the `Dockerfile`. An unambiguous way to run the tests is as follows
+Suppose we have a `project` with `src` and `test` directories, containing `python` source code and test scripts, respectively. Assume `/home/user/project` already exists when the container is launched, because that directory was setup with `python -m venv` in the `Dockerfile`. An unambiguous way to run the tests is as follows:
+
+```bash
+#!/bin/bash
+
+IMAGENAME=myimage
+
+CONTAINER_ID=$(docker run -d -ti $IMAGENAME)
+
+docker cp src/. $CONTAINER_ID:/home/user/project/src
+docker cp test/. $CONTAINER_ID:/home/user/project/test
+
+docker exec -it $CONTAINER_ID bash -c "source /home/user/project/bin/activate && \
+cd /home/user/project/ && \ 
+python -m unittest discover -s test"
+
+docker kill $CONTAINER_ID
+```
 
 ### 5. Housekeeping
 [Top](#reference)
