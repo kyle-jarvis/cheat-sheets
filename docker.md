@@ -2,7 +2,10 @@
 
 ## Reference
 1. [`docker run`](#docker-run)
-2. [Housekeeping](#housekeeping)
+2. [Basic work flow scripts: `docker cp`, `docker exec`, `docker kill`](#docker-workflows).
+3. [`activate` a `python` virtual environment](#python).
+4. [`unittest` a `python` project in a docker container](#python-unittest).
+5. [Housekeeping](#housekeeping)
 
 ### 1. `docker run`
 [Top](reference)
@@ -21,7 +24,7 @@ Success!
 user@61e4b0ecd539:~$
 ```
 
-Use `-v` to bind-mount a volume, exposing the files inside the running container:
+Use `-v` to bind-mount a volume, exposing the files inside the running container, for a shortcut to mount the current directory to the container use command substitution `-v $(pwd):/container/path`:
 
 ```
 PS C:\Users\kjarv> cd .\docker_tmp\
@@ -35,8 +38,50 @@ take_me_with_you.txt
 
 ```
 
+### 2. Python
+[Top](#reference)
 
-### 2. Housekeeping
+Easily use an `activate`d `venv` (assume we have a `project` directory in `/home/user`, setup as a virtual environment):
+
+```bash
+#!/bin/bash
+
+IMAGENAME=myimage
+
+CONTAINER_ID=$(docker run -d -ti $IMAGENAME)
+
+docker exec $CONTAINER_ID bash -c "echo 'source /home/user/project/bin/activate' >> /home/user/.bashrc"
+
+docker exec -it $CONTAINER_ID bash
+
+docker kill $CONTAINER_ID
+```
+
+### 3. Basic docker workflows
+[Top](#reference)
+
+I find the following to be a pretty useful workflow for working with content in a `localdir` host system directory:
+
+```bash
+#!/bin/bash
+
+IMAGENAME=myimage
+
+CONTAINER_ID=$(docker run -d -ti $IMAGENAME)
+
+docker cp localdir/. $CONTAINER_ID:/home/user/localdir
+
+docker exec -it $CONTAINER_ID bash
+
+docker kill $CONTAINER_ID
+```
+
+### 4. Python unittest
+[Top](#reference)
+
+Suppose we have a `project` with `src` and `test` directories, containing `python` source code and test scripts, respectively. Assume `/home/user/project` already exists when the container is launched, because that directory was setup with `python -m venv` in the `Dockerfile`. An unambiguous way to run the tests is as follows
+
+### 5. Housekeeping
 [Top](#reference)
 
 See containers with `docker container ls`. To tidy unused images run `docker image prune`, aggressively tidy by launching containers using images you want to keep, then `docker image prune -a`.
