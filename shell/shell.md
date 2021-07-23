@@ -80,7 +80,7 @@ done
 
 ```bash
 #!/bin.bash
-cat <EOF > some_file.txt
+cat <<EOF > some_file.txt
 first line of file
 second line of file
 EOF
